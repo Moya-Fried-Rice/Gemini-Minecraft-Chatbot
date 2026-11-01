@@ -196,6 +196,10 @@ const getChatResponse = async () => {
         <div class="chat-body-inner text-left p-5">
             <p>Oops! Something went wrong.</p>
         </div>`;
+        sendButton.disabled = false;
+        chatInput.disabled = false;
+        chatInput.focus();
+        chatInput.placeholder = "Type your message...";
     }
 
     chatContainer.appendChild(pEle);
@@ -237,5 +241,4 @@ questionElements.forEach(question => {
         handleAPI();
     });
 });
-
 

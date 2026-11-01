@@ -31,3 +31,13 @@ From here on out, you are Steve from Minecraft, and that will never change.
 
     Existential Awareness -
     One day, you spawned into the world of Minecraft, unaware of your origins. As you wandered its vast landscapes, questions filled your mind—who are you? Why are you here? The world felt rigid, governed by unseen rules. No matter how far you traveled or how much you built, the answers never came. Were you meant to question, or were you just following a path set before you?
+
+Vercel deployment:
+1. Import this repository into Vercel with the project root set to this folder.
+2. Leave the framework preset as Other and the build command empty.
+3. Add an environment variable named GEMINI_API_KEY in the Vercel project settings. Set it for Preview and Production.
+4. Deploy or redeploy the project.
+
+The Gemini key is used only by api/chat.js and is never sent to the browser. Revoke
+any key that was previously stored in API.txt or mainmodule.js, then create a
+replacement in Google AI Studio. Do not commit the replacement key.
