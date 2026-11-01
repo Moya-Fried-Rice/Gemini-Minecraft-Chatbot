@@ -6,7 +6,9 @@
 body {
     font-family: minecraft;
     margin: 0;
-    overflow: hidden;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-y: none;
 }
 
 #parallax-container {
