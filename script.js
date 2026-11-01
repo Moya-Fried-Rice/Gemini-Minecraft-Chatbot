@@ -1,4 +1,9 @@
 import {model} from "./mainmodule.js";
+
+if (window.matchMedia("(max-width: 700px), (max-height: 600px)").matches) {
+    window.scrollTo(window.innerWidth / 2, 0);
+}
+
 let x = 0;
 let y = 0;
 let targetX = 0;

@@ -93,6 +93,15 @@ body {
         overflow-x: auto;
         overflow-y: hidden;
         touch-action: pan-x;
+        min-width: calc(max(100vw, 175vh) + 100vw);
+    }
+
+    #parallax-container {
+        left: calc(50% + 50vw);
+    }
+
+    #chat-input {
+        touch-action: pan-y;
     }
 
     #steve {
