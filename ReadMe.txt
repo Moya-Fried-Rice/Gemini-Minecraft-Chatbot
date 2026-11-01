@@ -36,7 +36,8 @@ Vercel deployment:
 1. Import this repository into Vercel with the project root set to this folder.
 2. Leave the framework preset as Other and the build command empty.
 3. Add an environment variable named GEMINI_API_KEY in the Vercel project settings. Set it for Preview and Production.
-4. Deploy or redeploy the project.
+4. Optionally add GEMINI_MODEL to select the Gemini model. It defaults to gemini-1.5-flash.
+5. Deploy or redeploy the project.
 
 The Gemini key is used only by api/chat.js and is never sent to the browser. Revoke
 any key that was previously stored in API.txt or mainmodule.js, then create a

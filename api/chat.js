@@ -30,6 +30,7 @@ export default async function handler(request, response) {
         return response.status(500).json({ error: "GEMINI_API_KEY is not configured" });
     }
 
+    const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
     const contents = request.body && request.body.contents;
     if (!Array.isArray(contents) || contents.length === 0) {
         return response.status(400).json({ error: "A non-empty contents array is required" });
@@ -37,7 +38,9 @@ export default async function handler(request, response) {
 
     try {
         const geminiResponse = await fetch(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
+            "https://generativelanguage.googleapis.com/v1beta/models/" +
+                encodeURIComponent(model) +
+                ":generateContent?key=" +
                 encodeURIComponent(process.env.GEMINI_API_KEY),
             {
                 method: "POST",
