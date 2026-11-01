@@ -26,7 +26,7 @@ function animate() {
     y += (finalTargetY - y) * 0.1;
 
     // Apply the parallax effect
-    const layers = document.querySelectorAll('#parallax-container img, #parallax-container #steve');
+    const layers = document.querySelectorAll('#parallax-container .parallax-layer');
     
     layers.forEach((layer, index) => {
         const movement = (index + 1) * 10; // Control speed based on layer
@@ -241,4 +241,3 @@ questionElements.forEach(question => {
         handleAPI();
     });
 });
-
