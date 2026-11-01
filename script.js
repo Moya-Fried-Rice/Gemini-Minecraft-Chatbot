@@ -24,9 +24,9 @@ let isDragging = false;
 let orientationRequested = false;
 let orientationBaseBeta = null;
 let orientationBaseGamma = null;
-const touchParallaxSensitivity = 4;
+const touchParallaxSensitivity = 8;
 const touchParallaxAmount = 3;
-const tiltParallaxSensitivity = 6;
+const tiltParallaxSensitivity = 12;
 const tiltParallaxAmount = 5;
 
 function handleDeviceOrientation(event) {
@@ -119,14 +119,13 @@ function animate() {
     y += (finalTargetY - y) * 0.1;
 
     // Apply the parallax effect
-    const movementMultiplier = 0.12;
     layers.forEach((layer, index) => {
         const movement = (index + 1) * 10; // Control speed based on layer
-        const offsetX = (x - 0.5) * movement * movementMultiplier;
-        const offsetY = (y - 0.5) * movement * movementMultiplier;
+        const offsetX = x * movement * 0.1;
+        const offsetY = (y - 1) * movement * 0.1;
 
         layer.style.setProperty("--parallax-x", `${offsetX}vw`);
-        layer.style.setProperty("--parallax-y", `${offsetY}vh`);
+        layer.style.setProperty("--parallax-y", `${offsetY}vw`);
     });
 
     // Request the next frame to keep animating
