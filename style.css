@@ -137,7 +137,7 @@ body {
     #steve {
         width: 92vw;
         max-width: 92vw;
-        font-size: 0.85rem;
+        font-size: 1rem;
         top: 35% !important;
     }
 
@@ -146,28 +146,28 @@ body {
     }
 
     #steve .question {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
         padding-left: 0.35rem !important;
         padding-right: 0.35rem !important;
     }
 
     #steve .chat {
-        height: 7rem;
+        height: 8rem;
     }
 
     #steve .chat-body-inner {
         padding: 0.5rem !important;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
 
     #steve .typing textarea {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         padding: 0.4rem !important;
     }
 
     #steve .typing button {
         padding: 0.35rem 0.6rem !important;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
 }
 
