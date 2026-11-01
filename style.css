@@ -26,7 +26,10 @@ body {
     width: 100%;
     height: 100%;
     object-fit: fill;
-    transform: translate(var(--parallax-x, 0px), var(--parallax-y, 0px)) scale(1.2);
+    transform: translate(
+        var(--parallax-x, 0px),
+        calc(var(--parallax-y, 0px) - 5vh)
+    ) scale(1.2);
     transform-origin: center;
 }
 
@@ -92,7 +95,7 @@ body {
 /* ===== Responsive / Mobile Styles ===== */
 
 /* Tablets and smaller (max-width 768px) */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
     #steve {
         width: 90vw;
         max-width: 90vw;
@@ -121,10 +124,10 @@ body {
     #steve .typing button {
         padding: 0.4rem 0.75rem !important;
     }
-}
+} */
 
 /* Small phones (max-width 480px) */
-@media (max-width: 480px) {
+/* @media (max-width: 480px) {
     #steve {
         width: 92vw;
         max-width: 92vw;
@@ -155,10 +158,10 @@ body {
     #steve .typing button {
         padding: 0.35rem 0.6rem !important;
     }
-}
+} */
 
 /* Very short screens (landscape phones) */
-@media (max-height: 500px) {
+/* @media (max-height: 500px) {
     #steve {
         top: 30% !important;
     }
@@ -170,7 +173,7 @@ body {
     #steve .sample-questions {
         gap: 0.25rem !important;
     }
-}
+} */
 
 /* Style the entire scrollbar */
 ::-webkit-scrollbar {
