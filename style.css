@@ -28,7 +28,7 @@ body {
     object-fit: fill;
     transform: translate(
         var(--parallax-x, 0px),
-        calc(var(--parallax-y, 0px) - 5vh)
+        calc(var(--parallax-y, 0px) + 5vh)
     ) scale(1.2);
     transform-origin: center;
 }
