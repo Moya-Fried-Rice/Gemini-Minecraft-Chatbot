@@ -95,7 +95,7 @@ body {
 /* ===== Responsive / Mobile Styles ===== */
 
 /* Tablets and smaller (max-width 768px) */
-/* @media (max-width: 768px) {
+@media (max-width: 768px) {
     #steve {
         width: 90vw;
         max-width: 90vw;
@@ -104,76 +104,32 @@ body {
     }
 
     #steve .sample-questions {
-        gap: 0.5rem !important;
         position: static;
         width: 100%;
-    }
-
-    #steve .chat {
-        height: 8rem;
     }
 
     #steve .chat:not(.has-messages) {
         display: none;
     }
-
-    #steve .chat-body-inner {
-        padding: 0.75rem !important;
-    }
-
-    #steve .typing button {
-        padding: 0.4rem 0.75rem !important;
-    }
-} */
+}
 
 /* Small phones (max-width 480px) */
-/* @media (max-width: 480px) {
+@media (max-width: 480px) {
     #steve {
         width: 92vw;
         max-width: 92vw;
         top: 35% !important;
     }
 
-    #steve .sample-questions {
-        gap: 0.35rem !important;
-    }
-
-    #steve .question {
-        padding-left: 0.35rem !important;
-        padding-right: 0.35rem !important;
-    }
-
-    #steve .chat {
-        height: 7rem;
-    }
-
-    #steve .chat-body-inner {
-        padding: 0.5rem !important;
-    }
-
-    #steve .typing textarea {
-        padding: 0.1rem !important;
-    }
-
-    #steve .typing button {
-        padding: 0.35rem 0.6rem !important;
-    }
-} */
+}
 
 /* Very short screens (landscape phones) */
-/* @media (max-height: 500px) {
+@media (max-height: 500px) {
     #steve {
         top: 30% !important;
     }
 
-    #steve .chat {
-        height: 5rem;
-    }
-
-    #steve .sample-questions {
-        gap: 0.25rem !important;
-    }
-} */
+}
 
 /* Style the entire scrollbar */
 ::-webkit-scrollbar {
