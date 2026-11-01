@@ -33,8 +33,8 @@ function animate() {
         const offsetX = (x - 0) * movement; // Center around 0.5
         const offsetY = (y - 1) * movement; // Center around 0.5
 
-        // Apply transform for parallax effect
-        layer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        layer.style.setProperty("--parallax-x", `${offsetX}px`);
+        layer.style.setProperty("--parallax-y", `${offsetY}px`);
     });
 
     // Request the next frame to keep animating
@@ -241,4 +241,3 @@ questionElements.forEach(question => {
         handleAPI();
     });
 });
-
