@@ -3,10 +3,14 @@
     src: url(font/Minecraft.ttf);
 }
 
+html, body {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
 body {
     font-family: minecraft;
     margin: 0;
-    overflow: hidden;
 }
 
 #parallax-container {
@@ -32,9 +36,10 @@ body {
 
 #parallax-container #steve {
     transform: translate(
-        calc(-50% + var(--parallax-x, 0px)),
+        calc(-50% + var(--parallax-x, 0px) + var(--drag-x, 0px)),
         calc(-50% + var(--parallax-y, 0px))
     );
+    transition: none;
 }
 
 #steve {

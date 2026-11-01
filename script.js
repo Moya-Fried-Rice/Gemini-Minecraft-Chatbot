@@ -10,7 +10,10 @@ const layers = document.querySelectorAll('#parallax-container img, #parallax-con
 const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
 // --- Mouse-based parallax (desktop) ---
+// Ignore mouse movement when cursor is over the chat UI to prevent
+// the parallax from displacing the panel while the user interacts with it.
 document.addEventListener('mousemove', function(e) {
+    if (e.target.closest('#steve')) return;
     targetX = e.clientX / window.innerWidth;
     targetY = e.clientY / window.innerHeight;
 });
@@ -53,6 +56,77 @@ if (isTouchDevice) {
         targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * sensitivity));
     }, { passive: true });
 }
+
+// --- Horizontal drag for #steve on small screens (mobile) ---
+const steveEl = document.getElementById('steve');
+let steveDragStartX = 0;
+let steveDragStartY = 0;
+let steveDragBaseX = 0;
+let steveCurrentDragX = 0;
+let steveDragging = false;
+let steveDirectionLocked = false;
+
+function isSmallScreen() {
+    return window.innerWidth <= 768;
+}
+
+steveEl.addEventListener('touchstart', function(e) {
+    if (!isSmallScreen()) return;
+
+    // Don't hijack textarea or button interactions
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'textarea' || tag === 'button') return;
+
+    const touch = e.touches[0];
+    steveDragStartX = touch.clientX;
+    steveDragStartY = touch.clientY;
+    steveDragBaseX = steveCurrentDragX;
+    steveDragging = false;       // not yet committed
+    steveDirectionLocked = false;
+}, { passive: true });
+
+steveEl.addEventListener('touchmove', function(e) {
+    if (!isSmallScreen()) return;
+    if (steveDragStartX === null) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - steveDragStartX;
+    const deltaY = touch.clientY - steveDragStartY;
+
+    // Direction lock: wait for 10px of movement, then decide
+    if (!steveDirectionLocked) {
+        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+            steveDragging = Math.abs(deltaX) > Math.abs(deltaY);
+            steveDirectionLocked = true;
+        }
+        return; // Don't move yet, still detecting direction
+    }
+
+    if (!steveDragging) return; // Vertical gesture — let chat scroll handle it
+
+    // Horizontal drag — move #steve
+    steveCurrentDragX = steveDragBaseX + deltaX;
+
+    // Clamp so the UI doesn't disappear off-screen
+    const maxDrag = window.innerWidth * 0.4;
+    steveCurrentDragX = Math.max(-maxDrag, Math.min(maxDrag, steveCurrentDragX));
+
+    steveEl.style.setProperty('--drag-x', `${steveCurrentDragX}px`);
+}, { passive: true });
+
+steveEl.addEventListener('touchend', function() {
+    steveDragStartX = null;
+    steveDragging = false;
+    steveDirectionLocked = false;
+}, { passive: true });
+
+// Reset drag offset when screen resizes past the breakpoint
+window.addEventListener('resize', function() {
+    if (!isSmallScreen() && steveCurrentDragX !== 0) {
+        steveCurrentDragX = 0;
+        steveEl.style.setProperty('--drag-x', '0px');
+    }
+});
 
 // This function will animate the movement
 function animate() {
