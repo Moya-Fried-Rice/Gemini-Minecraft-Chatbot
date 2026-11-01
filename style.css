@@ -26,10 +26,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: fill;
-    transform: translate(
-        calc(var(--parallax-x, 0px) + 6vw),
-        calc(var(--parallax-y, 0px) - 6vh)
-    ) scale(1.2);
+    transform: translate(var(--parallax-x, 0px), var(--parallax-y, 0px)) scale(1.2);
     transform-origin: center;
 }
 
