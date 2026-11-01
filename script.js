@@ -24,6 +24,8 @@ let orientationEnabled = false;
 let orientationRequested = false;
 let orientationBaseBeta = null;
 let orientationBaseGamma = null;
+const touchParallaxSensitivity = 8;
+const tiltParallaxSensitivity = 25;
 
 function handleDeviceOrientation(event) {
     if (event.beta === null || event.gamma === null) return;
@@ -33,8 +35,8 @@ function handleDeviceOrientation(event) {
         orientationBaseGamma = event.gamma;
     }
 
-    const tiltX = (event.gamma - orientationBaseGamma) / 35;
-    const tiltY = (event.beta - orientationBaseBeta) / 35;
+    const tiltX = (event.gamma - orientationBaseGamma) / tiltParallaxSensitivity;
+    const tiltY = (event.beta - orientationBaseBeta) / tiltParallaxSensitivity;
     targetX = Math.max(0, Math.min(1, 0.5 + tiltX));
     targetY = Math.max(0, Math.min(1, 0.5 + tiltY));
     orientationEnabled = true;
@@ -86,10 +88,8 @@ if (isTouchDevice) {
         const deltaX = (touch.clientX - touchStartX) / window.innerWidth;
         const deltaY = (touch.clientY - touchStartY) / window.innerHeight;
 
-        // Sensitivity multiplier for drag — higher = more responsive
-        const sensitivity = 5.5;
-        targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * sensitivity));
-        targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * sensitivity));
+        targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * touchParallaxSensitivity));
+        targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * touchParallaxSensitivity));
     }, { passive: true });
 }
 
@@ -158,6 +158,10 @@ function changeSteveLight() {
     }, 1500);
 }
 
+function updateSendButtonState() {
+    sendButton.disabled = !isGenerating && !chatInput.value.trim();
+}
+
 function setGenerating(generating) {
     isGenerating = generating;
     if (generating) {
@@ -167,10 +171,10 @@ function setGenerating(generating) {
         chatInput.placeholder = 'Steve is... "thinking"';
     } else {
         sendButton.textContent = "Send";
-        sendButton.disabled = false;
         chatInput.disabled = false;
         chatInput.placeholder = "Type your message...";
         chatInput.focus();
+        updateSendButtonState();
     }
 }
 
@@ -376,6 +380,7 @@ const handleAPI = () => {
     chatBox.classList.add("has-messages");
     getChatResponse();
     chatInput.value = '';
+    updateSendButtonState();
 
     const chatBubble = document.createElement("div");
     chatBubble.classList.add("chat-bubble");
@@ -401,6 +406,8 @@ sendButton.addEventListener("click", () => {
     }
 });
 
+chatInput.addEventListener("input", updateSendButtonState);
+
 chatInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -419,3 +426,5 @@ questionElements.forEach(question => {
         handleAPI();
     });
 });
+
+updateSendButtonState();
