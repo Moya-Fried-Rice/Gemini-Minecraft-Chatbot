@@ -20,15 +20,15 @@ let touchStartX = 0;
 let touchStartY = 0;
 let touchBaseX = 0.5; // Start centered
 let touchBaseY = 0.5;
-let orientationEnabled = false;
+let isDragging = false;
 let orientationRequested = false;
 let orientationBaseBeta = null;
 let orientationBaseGamma = null;
 const touchParallaxSensitivity = 8;
-const tiltParallaxSensitivity = 25;
+const tiltParallaxSensitivity = 12;
 
 function handleDeviceOrientation(event) {
-    if (event.beta === null || event.gamma === null) return;
+    if (event.beta === null || event.gamma === null || isDragging) return;
 
     if (orientationBaseBeta === null || orientationBaseGamma === null) {
         orientationBaseBeta = event.beta;
@@ -39,7 +39,6 @@ function handleDeviceOrientation(event) {
     const tiltY = (event.beta - orientationBaseBeta) / tiltParallaxSensitivity;
     targetX = Math.max(0, Math.min(1, 0.5 + tiltX));
     targetY = Math.max(0, Math.min(1, 0.5 + tiltY));
-    orientationEnabled = true;
 }
 
 function requestDeviceOrientation() {
@@ -74,6 +73,7 @@ if (isTouchDevice) {
 
         requestDeviceOrientation();
         const touch = e.touches[0];
+        isDragging = true;
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
         touchBaseX = targetX;
@@ -82,7 +82,7 @@ if (isTouchDevice) {
 
     parallaxContainer.addEventListener('touchmove', function(e) {
         // Don't interfere with scrolling inside the chat
-        if (e.target.closest('#steve') || orientationEnabled) return;
+        if (e.target.closest('#steve')) return;
 
         const touch = e.touches[0];
         const deltaX = (touch.clientX - touchStartX) / window.innerWidth;
@@ -90,6 +90,14 @@ if (isTouchDevice) {
 
         targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * touchParallaxSensitivity));
         targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * touchParallaxSensitivity));
+    }, { passive: true });
+
+    parallaxContainer.addEventListener('touchend', function() {
+        isDragging = false;
+    }, { passive: true });
+
+    parallaxContainer.addEventListener('touchcancel', function() {
+        isDragging = false;
     }, { passive: true });
 }
 
