@@ -25,7 +25,7 @@ let orientationRequested = false;
 let orientationBaseBeta = null;
 let orientationBaseGamma = null;
 const touchParallaxSensitivity = 8;
-const tiltParallaxSensitivity = 12;
+const tiltParallaxSensitivity = 4;
 
 function handleDeviceOrientation(event) {
     if (event.beta === null || event.gamma === null || isDragging) return;
