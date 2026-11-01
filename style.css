@@ -30,10 +30,29 @@ body {
 }
 
 #parallax-container #steve {
+    width: clamp(280px, 31.25vw, 500px);
+    max-width: calc(100vw - 2rem);
+    font-size: clamp(0.75rem, 1.25vw, 1.25rem);
     transform: translate(
         calc(-50% + var(--parallax-x, 0px)),
         calc(-50% + var(--parallax-y, 0px))
     );
+}
+
+#parallax-container #steve .chat {
+    height: clamp(7rem, 10vw, 10rem);
+}
+
+#parallax-container #steve .typing {
+    gap: clamp(0.25rem, 0.5vw, 0.5rem);
+}
+
+#parallax-container #steve #chat-input {
+    padding: clamp(0.375rem, 0.5vw, 0.5rem);
+}
+
+#parallax-container #steve #send-btn {
+    padding: clamp(0.375rem, 0.5vw, 0.5rem) clamp(0.625rem, 0.75vw, 1rem);
 }
 
 #parallax-container img {
