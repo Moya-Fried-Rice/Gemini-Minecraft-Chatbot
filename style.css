@@ -30,29 +30,10 @@ body {
 }
 
 #parallax-container #steve {
-    width: 500px;
-    max-width: calc(100% - 2rem);
-    font-size: 1.25rem;
     transform: translate(
         calc(-50% + var(--parallax-x, 0px)),
         calc(-50% + var(--parallax-y, 0px))
     );
-}
-
-#parallax-container #steve .chat {
-    height: 10rem;
-}
-
-#parallax-container #steve .typing {
-    gap: 0.5rem;
-}
-
-#parallax-container #steve #chat-input {
-    padding: 0.5rem;
-}
-
-#parallax-container #steve #send-btn {
-    padding: 0.5rem 1rem;
 }
 
 #parallax-container img {
