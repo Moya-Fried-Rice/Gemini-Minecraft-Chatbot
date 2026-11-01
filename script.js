@@ -25,7 +25,9 @@ let orientationRequested = false;
 let orientationBaseBeta = null;
 let orientationBaseGamma = null;
 const touchParallaxSensitivity = 8;
-const tiltParallaxSensitivity = 4;
+const touchParallaxAmount = 3;
+const tiltParallaxSensitivity = 12;
+const tiltParallaxAmount = 3;
 
 function handleDeviceOrientation(event) {
     if (event.beta === null || event.gamma === null || isDragging) return;
@@ -37,8 +39,8 @@ function handleDeviceOrientation(event) {
 
     const tiltX = (event.gamma - orientationBaseGamma) / tiltParallaxSensitivity;
     const tiltY = (event.beta - orientationBaseBeta) / tiltParallaxSensitivity;
-    targetX = Math.max(0, Math.min(1, 0.5 + tiltX));
-    targetY = Math.max(0, Math.min(1, 0.5 + tiltY));
+    targetX = Math.max(0, Math.min(1, 0.5 + tiltX * tiltParallaxAmount));
+    targetY = Math.max(0, Math.min(1, 0.5 + tiltY * tiltParallaxAmount));
 }
 
 function requestDeviceOrientation() {
@@ -88,8 +90,8 @@ if (isTouchDevice) {
         const deltaX = (touch.clientX - touchStartX) / window.innerWidth;
         const deltaY = (touch.clientY - touchStartY) / window.innerHeight;
 
-        targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * touchParallaxSensitivity));
-        targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * touchParallaxSensitivity));
+        targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * touchParallaxSensitivity * touchParallaxAmount));
+        targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * touchParallaxSensitivity * touchParallaxAmount));
     }, { passive: true });
 
     parallaxContainer.addEventListener('touchend', function() {
