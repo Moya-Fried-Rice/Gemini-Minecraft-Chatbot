@@ -4,6 +4,7 @@ let y = 0;
 let targetX = 0;
 let targetY = 0;
 let time = 0; // A time variable to create periodic motion
+const layers = document.querySelectorAll('#parallax-container img, #parallax-container #steve');
 
 document.addEventListener('mousemove', function(e) {
     targetX = e.clientX / window.innerWidth;
@@ -26,15 +27,13 @@ function animate() {
     y += (finalTargetY - y) * 0.1;
 
     // Apply the parallax effect
-    const layers = document.querySelectorAll('#parallax-container img, #parallax-container #steve');
-    
     layers.forEach((layer, index) => {
         const movement = (index + 1) * 10; // Control speed based on layer
-        const offsetX = (x - 0) * movement; // Center around 0.5
-        const offsetY = (y - 1) * movement; // Center around 0.5
+        const offsetX = x * movement * 0.05;
+        const offsetY = (y - 1) * movement * 0.05;
 
-        layer.style.setProperty("--parallax-x", `${offsetX}px`);
-        layer.style.setProperty("--parallax-y", `${offsetY}px`);
+        layer.style.setProperty("--parallax-x", `${offsetX}vw`);
+        layer.style.setProperty("--parallax-y", `${offsetY}vw`);
     });
 
     // Request the next frame to keep animating
