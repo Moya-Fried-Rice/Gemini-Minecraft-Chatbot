@@ -20,6 +20,44 @@ let touchStartX = 0;
 let touchStartY = 0;
 let touchBaseX = 0.5; // Start centered
 let touchBaseY = 0.5;
+let orientationEnabled = false;
+let orientationRequested = false;
+let orientationBaseBeta = null;
+let orientationBaseGamma = null;
+
+function handleDeviceOrientation(event) {
+    if (event.beta === null || event.gamma === null) return;
+
+    if (orientationBaseBeta === null || orientationBaseGamma === null) {
+        orientationBaseBeta = event.beta;
+        orientationBaseGamma = event.gamma;
+    }
+
+    const tiltX = (event.gamma - orientationBaseGamma) / 35;
+    const tiltY = (event.beta - orientationBaseBeta) / 35;
+    targetX = Math.max(0, Math.min(1, 0.5 + tiltX));
+    targetY = Math.max(0, Math.min(1, 0.5 + tiltY));
+    orientationEnabled = true;
+}
+
+function requestDeviceOrientation() {
+    if (orientationRequested || !window.DeviceOrientationEvent) return;
+    orientationRequested = true;
+
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission()
+            .then(permission => {
+                if (permission === "granted") {
+                    window.addEventListener("deviceorientation", handleDeviceOrientation);
+                }
+            })
+            .catch(() => {
+                orientationRequested = false;
+            });
+    } else {
+        window.addEventListener("deviceorientation", handleDeviceOrientation);
+    }
+}
 
 if (isTouchDevice) {
     // Initialize targets to center so it looks natural before first touch
@@ -32,6 +70,7 @@ if (isTouchDevice) {
         // Don't interfere with taps on the chat UI
         if (e.target.closest('#steve')) return;
 
+        requestDeviceOrientation();
         const touch = e.touches[0];
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
@@ -41,7 +80,7 @@ if (isTouchDevice) {
 
     parallaxContainer.addEventListener('touchmove', function(e) {
         // Don't interfere with scrolling inside the chat
-        if (e.target.closest('#steve')) return;
+        if (e.target.closest('#steve') || orientationEnabled) return;
 
         const touch = e.touches[0];
         const deltaX = (touch.clientX - touchStartX) / window.innerWidth;
@@ -95,6 +134,7 @@ const audio = document.getElementById('audioPlayer');
 const steveButton = document.querySelector("#steve-button");
 const stoneClicked = new Audio("sounds/Stone_button_press.ogg");
 const stoneUnclicked = new Audio("sounds/Stone_button_unpress.ogg");
+let steveLightTimeout = null;
 
 let conversationHistory = [];
 let isGenerating = false;
@@ -103,6 +143,20 @@ let stopRequested = false;
 let currentTypingInterval = null;
 let currentPauseTimeout = null;
 let currentResolve = null;
+
+function changeSteveLight() {
+    steveButton.src = "images/steve-on.png";
+
+    if (steveLightTimeout) {
+        clearTimeout(steveLightTimeout);
+    }
+
+    steveLightTimeout = setTimeout(() => {
+        steveButton.src = "images/steve-off.png";
+        stoneUnclicked.play();
+        steveLightTimeout = null;
+    }, 1500);
+}
 
 function setGenerating(generating) {
     isGenerating = generating;
@@ -158,13 +212,7 @@ const getChatResponse = async () => {
     audio.muted = false;
     audio.play();
     stoneClicked.play();
-
-    steveButton.src = "images/steve-on.png";
-
-    setTimeout(() => {
-        steveButton.src = "images/steve-off.png";
-        stoneUnclicked.play();
-    }, 1500);
+    changeSteveLight();
 
     stopRequested = false;
     abortController = new AbortController();
@@ -346,6 +394,7 @@ const handleAPI = () => {
 sendButton.addEventListener("click", () => {
     if (isGenerating) {
         stoneClicked.play();
+        changeSteveLight();
         stopGeneration();
     } else {
         handleAPI();
