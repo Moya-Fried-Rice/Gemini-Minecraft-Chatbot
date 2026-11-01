@@ -17,7 +17,7 @@ function animate() {
     time += 0.01; // Increment time for smooth motion
     const noiseX = Math.sin(time) * 0.25; // Small periodic motion for X
     const noiseY = Math.cos(time) * 0.25; // Small periodic motion for Y
-
+    
     // Combine mouse movement with continuous motion
     const finalTargetX = targetX + noiseX;
     const finalTargetY = targetY + noiseY;

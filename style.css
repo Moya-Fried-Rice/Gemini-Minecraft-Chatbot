@@ -30,14 +30,18 @@ body {
 }
 
 #parallax-container #steve {
-    transform: translate(
-        calc(-50% + var(--parallax-x, 0px)),
-        calc(-50% + var(--parallax-y, 0px))
-    );
+    transform: translate(var(--parallax-x, 0px), var(--parallax-y, 0px));
+}
+
+#chat-wrapper {
+    position: absolute;
+    top: 33.3333%;
+    left: 45%;
+    transform: translate(-50%, -50%);
 }
 
 #steve {
-    left: 35%;
+    position: relative;
     width: 500px;
     font-size: 1.25rem;
 }
