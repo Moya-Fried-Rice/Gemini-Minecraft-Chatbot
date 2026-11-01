@@ -1,4 +1,4 @@
-# SteveChat ⛏️🤖
+# Gemini Minecraft Chatbot
 
 An interactive Minecraft-themed chatbot powered by Google Gemini. Talk with Steve, your knowledgeable yet existentially aware Minecraft guide, set against an immersive multi-layer parallax backdrop.
 
