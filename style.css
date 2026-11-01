@@ -36,6 +36,62 @@ body {
     );
 }
 
+#steve {
+    width: 500px;
+    font-size: 1.25rem;
+}
+
+#steve .sample-questions {
+    gap: 0.75rem !important;
+}
+
+#steve .question {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+#steve .chat {
+    height: 10rem;
+    padding: 0.5rem !important;
+}
+
+#steve .chatbot-container {
+    padding-bottom: 5rem !important;
+}
+
+#steve .chat-body-inner {
+    padding: 1.25rem !important;
+}
+
+#steve .chat-body-inner > .m-2 {
+    margin: 0.5rem !important;
+}
+
+#steve .typing {
+    gap: 0.5rem !important;
+}
+
+#steve .typing textarea {
+    padding: 0.5rem !important;
+}
+
+#steve .typing button {
+    padding: 0.5rem 1rem !important;
+}
+
+#steve.space-y-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.5rem !important;
+}
+
+@media (max-width: 700px), (max-height: 600px) {
+    #steve {
+        top: 50%;
+        left: 50%;
+        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
+    }
+}
+
 #parallax-container img {
     pointer-events: none;
 }
