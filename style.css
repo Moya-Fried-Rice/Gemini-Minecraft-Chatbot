@@ -96,34 +96,30 @@ body {
     #steve {
         width: 90vw;
         max-width: 90vw;
-        font-size: 1rem;
         left: 50% !important;
         top: 40% !important;
     }
 
     #steve .sample-questions {
         gap: 0.5rem !important;
-    }
-
-    #steve .question {
-        font-size: 0.85rem;
+        position: static;
+        width: 100%;
     }
 
     #steve .chat {
         height: 8rem;
     }
 
+    #steve .chat:not(.has-messages) {
+        display: none;
+    }
+
     #steve .chat-body-inner {
         padding: 0.75rem !important;
     }
 
-    #steve .typing textarea {
-        font-size: 0.9rem;
-    }
-
     #steve .typing button {
         padding: 0.4rem 0.75rem !important;
-        font-size: 0.9rem;
     }
 }
 
@@ -132,7 +128,6 @@ body {
     #steve {
         width: 92vw;
         max-width: 92vw;
-        font-size: 0.85rem;
         top: 35% !important;
     }
 
@@ -141,7 +136,6 @@ body {
     }
 
     #steve .question {
-        font-size: 0.75rem;
         padding-left: 0.35rem !important;
         padding-right: 0.35rem !important;
     }
@@ -152,17 +146,14 @@ body {
 
     #steve .chat-body-inner {
         padding: 0.5rem !important;
-        font-size: 0.8rem;
     }
 
     #steve .typing textarea {
-        font-size: 0.8rem;
-        padding: 0.4rem !important;
+        padding: 0.1rem !important;
     }
 
     #steve .typing button {
         padding: 0.35rem 0.6rem !important;
-        font-size: 0.8rem;
     }
 }
 

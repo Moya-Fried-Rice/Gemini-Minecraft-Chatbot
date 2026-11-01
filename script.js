@@ -325,6 +325,7 @@ const handleAPI = () => {
     if (isGenerating) return;
     const userText = chatInput.value.trim();
     if (!userText) return;
+    chatBox.classList.add("has-messages");
     getChatResponse();
     chatInput.value = '';
 
