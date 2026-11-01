@@ -48,7 +48,7 @@ if (isTouchDevice) {
         const deltaY = (touch.clientY - touchStartY) / window.innerHeight;
 
         // Sensitivity multiplier for drag — higher = more responsive
-        const sensitivity = 2.5;
+        const sensitivity = 5.5;
         targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * sensitivity));
         targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * sensitivity));
     }, { passive: true });
@@ -97,6 +97,50 @@ const stoneClicked = new Audio("sounds/Stone_button_press.ogg");
 const stoneUnclicked = new Audio("sounds/Stone_button_unpress.ogg");
 
 let conversationHistory = [];
+let isGenerating = false;
+let abortController = null;
+let stopRequested = false;
+let currentTypingInterval = null;
+let currentPauseTimeout = null;
+let currentResolve = null;
+
+function setGenerating(generating) {
+    isGenerating = generating;
+    if (generating) {
+        sendButton.textContent = "Stop";
+        sendButton.disabled = false;
+        chatInput.disabled = true;
+        chatInput.placeholder = 'Steve is... "thinking"';
+    } else {
+        sendButton.textContent = "Send";
+        sendButton.disabled = false;
+        chatInput.disabled = false;
+        chatInput.placeholder = "Type your message...";
+        chatInput.focus();
+    }
+}
+
+function stopGeneration() {
+    stopRequested = true;
+    if (abortController) {
+        try {
+            abortController.abort();
+        } catch (_) {}
+    }
+    if (currentTypingInterval) {
+        clearInterval(currentTypingInterval);
+        currentTypingInterval = null;
+    }
+    if (currentPauseTimeout) {
+        clearTimeout(currentPauseTimeout);
+        currentPauseTimeout = null;
+    }
+    if (currentResolve) {
+        currentResolve();
+        currentResolve = null;
+    }
+    setGenerating(false);
+}
 
 const getChatResponse = async () => {
     const message = chatInput.value;
@@ -113,9 +157,6 @@ const getChatResponse = async () => {
     sampleQuestions.style.display = 'none';
     audio.muted = false;
     audio.play();
-    sendButton.disabled = true;
-    chatInput.disabled = true;
-    chatInput.placeholder = 'Steve is... "thinking"';
     stoneClicked.play();
 
     steveButton.src = "images/steve-on.png";
@@ -125,18 +166,29 @@ const getChatResponse = async () => {
         stoneUnclicked.play();
     }, 1500);
 
+    stopRequested = false;
+    abortController = new AbortController();
+    setGenerating(true);
+
     try {
-        // Pass the conversation history to the model
+        // Pass the conversation history to the model with abort signal
         const result = await model.generateContent({
-            contents: conversationHistory
+            contents: conversationHistory,
+            signal: abortController.signal
         });
         const response = await result.response.text();
+
+        if (stopRequested) {
+            return;
+        }
 
         // Add the AI's response to the conversation history
         conversationHistory.push({
             role: "model",
             parts: [{ text: response }]
         });
+
+        chatInput.placeholder = 'Steve is typing...';
 
         function splitParagraph(paragraph) {
             let parentheticalSentences = [];
@@ -166,6 +218,7 @@ const getChatResponse = async () => {
 
         function typeSentence(subSentence, paragraph) {
             return new Promise(resolve => {
+                currentResolve = resolve;
                 let charIndex = 0;
                 const isSpecial = subSentence.startsWith("**");
                 if (isSpecial) {
@@ -179,11 +232,20 @@ const getChatResponse = async () => {
                 span.textContent = "";  
                 paragraph.appendChild(span);  
 
-                const typingInterval = setInterval(() => {
+                currentTypingInterval = setInterval(() => {
+                    if (stopRequested) {
+                        clearInterval(currentTypingInterval);
+                        currentTypingInterval = null;
+                        currentResolve = null;
+                        resolve();
+                        return;
+                    }
                     span.textContent += subSentence[charIndex];
                     charIndex++;
                     if (charIndex === subSentence.length) {
-                        clearInterval(typingInterval);
+                        clearInterval(currentTypingInterval);
+                        currentTypingInterval = null;
+                        currentResolve = null;
                         resolve();
                     }
                     chatBox.scrollTo({
@@ -195,12 +257,22 @@ const getChatResponse = async () => {
         }
 
         function pause() {
+            if (stopRequested) return Promise.resolve();
             const randomPause = Math.floor(Math.random() * (1000 - 700 + 1)) + 700;
-            return new Promise(resolve => setTimeout(resolve, randomPause));
+            return new Promise(resolve => {
+                currentResolve = resolve;
+                currentPauseTimeout = setTimeout(() => {
+                    currentPauseTimeout = null;
+                    currentResolve = null;
+                    resolve();
+                }, randomPause);
+            });
         }
 
         async function handleTypingEffect() {
+            chatContainer.appendChild(pEle);
             for (let sentence of sentences) {
+                if (stopRequested) break;
                 const subSentences = sentence.match(/[^.!?]+(?:[.!?]+)?/g) || [sentence];
 
                 const bubble = document.createElement('div');
@@ -217,67 +289,81 @@ const getChatResponse = async () => {
                 pEle.appendChild(bubble);
 
                 for (let subSentence of subSentences) {
+                    if (stopRequested) break;
                     await typeSentence(subSentence, paragraph);
+                    if (stopRequested) break;
                     await pause();
                 }
                 console.log("Steve:", sentence);
             }
             
-            sendButton.disabled = false;
-            chatInput.disabled = false;
-            chatInput.focus();
-            chatInput.placeholder = "Type your message...";
+            setGenerating(false);
         }
 
         handleTypingEffect();
         
     } catch (error) {
-        pEle.classList.add("gemini-response");
-        console.log("Error fetching gemini response: ", error);
-        pEle.innerHTML = `
-        <div class="chat-body-inner text-left p-5">
-            <p>Oops! Something went wrong.</p>
-        </div>`;
-        sendButton.disabled = false;
-        chatInput.disabled = false;
-        chatInput.focus();
-        chatInput.placeholder = "Type your message...";
+        if (error.name === "AbortError" || stopRequested) {
+            console.log("Gemini request was stopped.");
+            if (conversationHistory.length > 0 && conversationHistory[conversationHistory.length - 1].role === "user") {
+                conversationHistory.pop();
+            }
+        } else {
+            pEle.classList.add("gemini-response");
+            console.log("Error fetching gemini response: ", error);
+            pEle.innerHTML = `
+            <div class="chat-body-inner text-left p-5">
+                <p>Oops! Something went wrong.</p>
+            </div>`;
+            chatContainer.appendChild(pEle);
+        }
+        setGenerating(false);
     }
-
-    chatContainer.appendChild(pEle);
 };
 
 const handleAPI = () => {
+    if (isGenerating) return;
     const userText = chatInput.value.trim();
-    if(!userText) return;
+    if (!userText) return;
     getChatResponse();
     chatInput.value = '';
 
-    const chatBubbble = document.createElement("div");
-    chatBubbble.classList.add("chat-bubble");
-    chatBubbble.innerHTML = `
+    const chatBubble = document.createElement("div");
+    chatBubble.classList.add("chat-bubble");
+    chatBubble.innerHTML = `
     <div class="chat-body-inner text-right p-5 w-5/6 ml-auto">
         <p>${userText}</p>
     </div>
     `;
-    chatContainer.appendChild(chatBubbble);
+    chatContainer.appendChild(chatBubble);
     chatBox.scrollTo({
         top: chatContainer.scrollHeight,
         behavior: 'smooth'
     });
-}
+};
 
-sendButton.addEventListener("click", handleAPI);
-
-chatInput.addEventListener("keydown", (e) =>{
-    if(e.key == "Enter") {
+sendButton.addEventListener("click", () => {
+    if (isGenerating) {
+        stoneClicked.play();
+        stopGeneration();
+    } else {
         handleAPI();
+    }
+});
+
+chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!isGenerating) {
+            handleAPI();
+        }
     }
 });
 
 const questionElements = document.querySelectorAll('.question');
 questionElements.forEach(question => {
     question.addEventListener('click', (event) => {
+        if (isGenerating) return;
         const questionText = event.target.textContent;
         chatInput.value = questionText;
         handleAPI();
