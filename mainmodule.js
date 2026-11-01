@@ -1,10 +1,9 @@
 const model = {
-    async generateContent({ contents, signal }) {
+    async generateContent({ contents }) {
         const response = await fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents }),
-            signal
+            body: JSON.stringify({ contents })
         });
 
         if (!response.ok) {

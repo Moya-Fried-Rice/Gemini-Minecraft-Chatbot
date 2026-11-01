@@ -50,24 +50,10 @@ const chatBox = document.querySelector(".chat");
 const sampleQuestions = document.querySelector('.sample-questions');
 const audio = document.getElementById('audioPlayer');
 const steveButton = document.querySelector("#steve-button");
-const stopButton = document.querySelector("#stop-btn");
 const stoneClicked = new Audio("sounds/Stone_button_press.ogg");
 const stoneUnclicked = new Audio("sounds/Stone_button_unpress.ogg");
 
 let conversationHistory = [];
-let activeJob = null;
-
-const resetChatControls = () => {
-    if (activeJob?.steveTimer) {
-        clearTimeout(activeJob.steveTimer);
-    }
-    activeJob = null;
-    sendButton.disabled = false;
-    chatInput.disabled = false;
-    stopButton.hidden = true;
-    chatInput.placeholder = "Type your message...";
-    steveButton.src = "images/steve-off.png";
-};
 
 const getChatResponse = async () => {
     const message = chatInput.value;
@@ -80,26 +66,18 @@ const getChatResponse = async () => {
     });
 
     const pEle = document.createElement("div");
-    const job = {
-        controller: new AbortController(),
-        cancelled: false,
-        responseAdded: false,
-        timers: new Set()
-    };
-    activeJob = job;
 
     sampleQuestions.style.display = 'none';
     audio.muted = false;
     audio.play();
     sendButton.disabled = true;
     chatInput.disabled = true;
-    stopButton.hidden = false;
     chatInput.placeholder = 'Steve is... "thinking"';
     stoneClicked.play();
 
     steveButton.src = "images/steve-on.png";
 
-    job.steveTimer = setTimeout(() => {
+    setTimeout(() => {
         steveButton.src = "images/steve-off.png";
         stoneUnclicked.play();
     }, 1500);
@@ -107,8 +85,7 @@ const getChatResponse = async () => {
     try {
         // Pass the conversation history to the model
         const result = await model.generateContent({
-            contents: conversationHistory,
-            signal: job.controller.signal
+            contents: conversationHistory
         });
         const response = await result.response.text();
 
@@ -117,7 +94,6 @@ const getChatResponse = async () => {
             role: "model",
             parts: [{ text: response }]
         });
-        job.responseAdded = true;
 
         function splitParagraph(paragraph) {
             let parentheticalSentences = [];
@@ -147,11 +123,6 @@ const getChatResponse = async () => {
 
         function typeSentence(subSentence, paragraph) {
             return new Promise(resolve => {
-                if (job.cancelled) {
-                    resolve();
-                    return;
-                }
-
                 let charIndex = 0;
                 const isSpecial = subSentence.startsWith("**");
                 if (isSpecial) {
@@ -166,12 +137,6 @@ const getChatResponse = async () => {
                 paragraph.appendChild(span);  
 
                 const typingInterval = setInterval(() => {
-                    if (job.cancelled) {
-                        clearInterval(typingInterval);
-                        resolve();
-                        return;
-                    }
-
                     span.textContent += subSentence[charIndex];
                     charIndex++;
                     if (charIndex === subSentence.length) {
@@ -183,24 +148,16 @@ const getChatResponse = async () => {
                         behavior: 'smooth'
                     });
                 }, 35);
-                job.timers.add(typingInterval);
             });
         }
 
         function pause() {
             const randomPause = Math.floor(Math.random() * (1000 - 700 + 1)) + 700;
-            return new Promise(resolve => {
-                const timer = setTimeout(() => {
-                    job.timers.delete(timer);
-                    resolve();
-                }, randomPause);
-                job.timers.add(timer);
-            });
+            return new Promise(resolve => setTimeout(resolve, randomPause));
         }
 
         async function handleTypingEffect() {
             for (let sentence of sentences) {
-                if (job.cancelled) return;
                 const subSentences = sentence.match(/[^.!?]+(?:[.!?]+)?/g) || [sentence];
 
                 const bubble = document.createElement('div');
@@ -218,52 +175,33 @@ const getChatResponse = async () => {
 
                 for (let subSentence of subSentences) {
                     await typeSentence(subSentence, paragraph);
-                    if (job.cancelled) return;
                     await pause();
                 }
                 console.log("Steve:", sentence);
             }
-
-            if (activeJob === job) {
-                resetChatControls();
-                chatInput.focus();
-            }
+            
+            sendButton.disabled = false;
+            chatInput.disabled = false;
+            chatInput.focus();
+            chatInput.placeholder = "Type your message...";
         }
 
         handleTypingEffect();
         
     } catch (error) {
-        if (job.cancelled || error.name === "AbortError") {
-            if (!job.responseAdded && conversationHistory.at(-1)?.role === "user") {
-                conversationHistory.pop();
-            }
-            return;
-        }
-
         pEle.classList.add("gemini-response");
         console.log("Error fetching gemini response: ", error);
         pEle.innerHTML = `
         <div class="chat-body-inner text-left p-5">
             <p>Oops! Something went wrong.</p>
         </div>`;
-        resetChatControls();
+        sendButton.disabled = false;
+        chatInput.disabled = false;
         chatInput.focus();
+        chatInput.placeholder = "Type your message...";
     }
 
     chatContainer.appendChild(pEle);
-};
-
-const stopChat = () => {
-    if (!activeJob) return;
-
-    activeJob.cancelled = true;
-    activeJob.controller.abort();
-    activeJob.timers.forEach(timer => {
-        clearInterval(timer);
-        clearTimeout(timer);
-    });
-    activeJob.timers.clear();
-    resetChatControls();
 };
 
 const handleAPI = () => {
@@ -287,7 +225,6 @@ const handleAPI = () => {
 }
 
 sendButton.addEventListener("click", handleAPI);
-stopButton.addEventListener("click", stopChat);
 
 chatInput.addEventListener("keydown", (e) =>{
     if(e.key == "Enter") {
