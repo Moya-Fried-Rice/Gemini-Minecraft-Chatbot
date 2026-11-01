@@ -6,10 +6,53 @@ let targetY = 0;
 let time = 0; // A time variable to create periodic motion
 const layers = document.querySelectorAll('#parallax-container img, #parallax-container #steve');
 
+// --- Detect touch device ---
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+// --- Mouse-based parallax (desktop) ---
 document.addEventListener('mousemove', function(e) {
     targetX = e.clientX / window.innerWidth;
     targetY = e.clientY / window.innerHeight;
 });
+
+// --- Touch/drag-based parallax (mobile) ---
+let touchStartX = 0;
+let touchStartY = 0;
+let touchBaseX = 0.5; // Start centered
+let touchBaseY = 0.5;
+
+if (isTouchDevice) {
+    // Initialize targets to center so it looks natural before first touch
+    targetX = 0.5;
+    targetY = 0.5;
+
+    const parallaxContainer = document.getElementById('parallax-container');
+
+    parallaxContainer.addEventListener('touchstart', function(e) {
+        // Don't interfere with taps on the chat UI
+        if (e.target.closest('#steve')) return;
+
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchBaseX = targetX;
+        touchBaseY = targetY;
+    }, { passive: true });
+
+    parallaxContainer.addEventListener('touchmove', function(e) {
+        // Don't interfere with scrolling inside the chat
+        if (e.target.closest('#steve')) return;
+
+        const touch = e.touches[0];
+        const deltaX = (touch.clientX - touchStartX) / window.innerWidth;
+        const deltaY = (touch.clientY - touchStartY) / window.innerHeight;
+
+        // Sensitivity multiplier for drag — higher = more responsive
+        const sensitivity = 2.5;
+        targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * sensitivity));
+        targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * sensitivity));
+    }, { passive: true });
+}
 
 // This function will animate the movement
 function animate() {
