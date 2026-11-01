@@ -3,14 +3,10 @@
     src: url(font/Minecraft.ttf);
 }
 
-html, body {
-    overflow: hidden;
-    overscroll-behavior: none;
-}
-
 body {
     font-family: minecraft;
     margin: 0;
+    overflow: hidden;
 }
 
 #parallax-container {
@@ -21,9 +17,7 @@ body {
     height: max(100vh, 57.142857vw);
     overflow: hidden;
     transform: translate(-50%, -50%);
-    /* pan-y: allow vertical scroll to pass through to .chat,
-       block horizontal browser gestures (swipe-back etc.) */
-    touch-action: pan-y;
+    touch-action: none;
 }
 
 #parallax-container img {
@@ -38,7 +32,7 @@ body {
 
 #parallax-container #steve {
     transform: translate(
-        calc(-50% + var(--parallax-x, 0px) + var(--drag-x, 0px)),
+        calc(-50% + var(--parallax-x, 0px)),
         calc(-50% + var(--parallax-y, 0px))
     );
 }
@@ -47,12 +41,6 @@ body {
     width: 500px;
     max-width: 90vw;
     font-size: 1.25rem;
-}
-
-/* Allow vertical scrolling inside the chat on touch devices */
-#steve .chat {
-    touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
 }
 
 #steve .sample-questions {
@@ -87,8 +75,6 @@ body {
 
 #steve .typing textarea {
     padding: 0.5rem !important;
-    /* Let the textarea handle its own touch for text selection/cursor */
-    touch-action: manipulation;
 }
 
 #steve .typing button {

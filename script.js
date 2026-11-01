@@ -10,134 +10,49 @@ const layers = document.querySelectorAll('#parallax-container img, #parallax-con
 const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
 // --- Mouse-based parallax (desktop) ---
-// Ignore mouse movement when cursor is over the chat UI to prevent
-// the parallax from displacing the panel while the user interacts with it.
 document.addEventListener('mousemove', function(e) {
-    if (e.target.closest('#steve')) return;
     targetX = e.clientX / window.innerWidth;
     targetY = e.clientY / window.innerHeight;
 });
 
-// --- Touch/drag-based parallax for background (mobile) ---
-let parallaxTouchStartX = 0;
-let parallaxTouchStartY = 0;
-let parallaxTouchBaseX = 0.5;
-let parallaxTouchBaseY = 0.5;
+// --- Touch/drag-based parallax (mobile) ---
+let touchStartX = 0;
+let touchStartY = 0;
+let touchBaseX = 0.5; // Start centered
+let touchBaseY = 0.5;
 
 if (isTouchDevice) {
+    // Initialize targets to center so it looks natural before first touch
     targetX = 0.5;
     targetY = 0.5;
 
     const parallaxContainer = document.getElementById('parallax-container');
 
     parallaxContainer.addEventListener('touchstart', function(e) {
-        // If touch is on #steve, do nothing — steve's own handlers take over
+        // Don't interfere with taps on the chat UI
         if (e.target.closest('#steve')) return;
 
         const touch = e.touches[0];
-        parallaxTouchStartX = touch.clientX;
-        parallaxTouchStartY = touch.clientY;
-        parallaxTouchBaseX = targetX;
-        parallaxTouchBaseY = targetY;
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchBaseX = targetX;
+        touchBaseY = targetY;
     }, { passive: true });
 
     parallaxContainer.addEventListener('touchmove', function(e) {
+        // Don't interfere with scrolling inside the chat
         if (e.target.closest('#steve')) return;
 
-        // Prevent browser from doing anything with background drags
-        e.preventDefault();
-
         const touch = e.touches[0];
-        const deltaX = (touch.clientX - parallaxTouchStartX) / window.innerWidth;
-        const deltaY = (touch.clientY - parallaxTouchStartY) / window.innerHeight;
+        const deltaX = (touch.clientX - touchStartX) / window.innerWidth;
+        const deltaY = (touch.clientY - touchStartY) / window.innerHeight;
 
+        // Sensitivity multiplier for drag — higher = more responsive
         const sensitivity = 2.5;
-        targetX = Math.max(0, Math.min(1, parallaxTouchBaseX + deltaX * sensitivity));
-        targetY = Math.max(0, Math.min(1, parallaxTouchBaseY + deltaY * sensitivity));
-    }, { passive: false }); // non-passive so we can preventDefault
+        targetX = Math.max(0, Math.min(1, touchBaseX + deltaX * sensitivity));
+        targetY = Math.max(0, Math.min(1, touchBaseY + deltaY * sensitivity));
+    }, { passive: true });
 }
-
-// --- Horizontal drag for #steve on small screens (mobile) ---
-const steveEl = document.getElementById('steve');
-let steveDragStartX = null;
-let steveDragStartY = null;
-let steveDragBaseX = 0;
-let steveCurrentDragX = 0;
-let steveDragging = false;
-let steveDirectionLocked = false;
-
-function isSmallScreen() {
-    return window.innerWidth <= 768;
-}
-
-// Block ALL touch events on #steve from bubbling up to the parallax container.
-// This is the reliable fix: stopPropagation prevents the parallax from ever
-// seeing touches that originate on the chat UI, textarea, buttons, or questions.
-steveEl.addEventListener('touchstart', function(e) {
-    e.stopPropagation();
-
-    if (!isSmallScreen()) return;
-
-    // Don't set up drag for textarea or button — let them behave normally
-    const tag = e.target.tagName.toLowerCase();
-    if (tag === 'textarea' || tag === 'button') return;
-
-    const touch = e.touches[0];
-    steveDragStartX = touch.clientX;
-    steveDragStartY = touch.clientY;
-    steveDragBaseX = steveCurrentDragX;
-    steveDragging = false;       // not committed yet
-    steveDirectionLocked = false;
-}, { passive: true });
-
-steveEl.addEventListener('touchmove', function(e) {
-    e.stopPropagation();
-
-    if (!isSmallScreen()) return;
-    if (steveDragStartX === null) return;
-
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - steveDragStartX;
-    const deltaY = touch.clientY - steveDragStartY;
-
-    // Direction lock: first 8px of movement decides horizontal drag vs vertical scroll
-    if (!steveDirectionLocked) {
-        if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
-            steveDragging = Math.abs(deltaX) > Math.abs(deltaY);
-            steveDirectionLocked = true;
-        }
-        return; // Still detecting direction
-    }
-
-    // Vertical gesture → do NOT preventDefault, let native chat scroll work
-    if (!steveDragging) return;
-
-    // Horizontal gesture → take over, prevent browser back-swipe / other gestures
-    e.preventDefault();
-
-    steveCurrentDragX = steveDragBaseX + deltaX;
-
-    // Clamp so the UI can't be flung completely off-screen
-    const maxDrag = window.innerWidth * 0.4;
-    steveCurrentDragX = Math.max(-maxDrag, Math.min(maxDrag, steveCurrentDragX));
-
-    steveEl.style.setProperty('--drag-x', `${steveCurrentDragX}px`);
-}, { passive: false }); // non-passive so we can preventDefault for horizontal drags
-
-steveEl.addEventListener('touchend', function() {
-    e.stopPropagation();
-    steveDragStartX = null;
-    steveDragging = false;
-    steveDirectionLocked = false;
-}, { passive: true });
-
-// Reset drag offset when screen resizes past the breakpoint
-window.addEventListener('resize', function() {
-    if (!isSmallScreen() && steveCurrentDragX !== 0) {
-        steveCurrentDragX = 0;
-        steveEl.style.setProperty('--drag-x', '0px');
-    }
-});
 
 // This function will animate the movement
 function animate() {
