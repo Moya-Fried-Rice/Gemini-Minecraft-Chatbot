@@ -121,8 +121,8 @@ function animate() {
     // Apply the parallax effect
     layers.forEach((layer, index) => {
         const movement = (index + 1) * 10; // Control speed based on layer
-        const offsetX = x * movement * 0.1;
-        const offsetY = (y - 1) * movement * 0.1;
+        const offsetX = x * movement * 0.7;
+        const offsetY = (y - 1) * movement * 0.7;
 
         layer.style.setProperty("--parallax-x", `${offsetX}vw`);
         layer.style.setProperty("--parallax-y", `${offsetY}vw`);
